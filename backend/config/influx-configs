@@ -1,0 +1,20 @@
+[default]
+  url = "http://localhost:8086"
+  token = "cTmc1xEwfR7hWJYclwL-eHny_MrNW9ujiE6DSjiH4yW-fQxYMe8kmUEr1Cj0D6ESSHVQ2fM14ASQmcg7RyudeQ=="
+  org = "ntc-org"
+  active = true
+# 
+# [eu-central]
+#   url = "https://eu-central-1-1.aws.cloud2.influxdata.com"
+#   token = "XXX"
+#   org = ""
+# 
+# [us-central]
+#   url = "https://us-central1-1.gcp.cloud2.influxdata.com"
+#   token = "XXX"
+#   org = ""
+# 
+# [us-west]
+#   url = "https://us-west-2-1.aws.cloud2.influxdata.com"
+#   token = "XXX"
+#   org = ""

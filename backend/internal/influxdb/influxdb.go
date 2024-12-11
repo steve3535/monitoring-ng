@@ -15,7 +15,7 @@ import (
 // InitEnv charge les variables d'environnement depuis un fichier .env
 func InitEnv() {
 	// Charger le fichier .env
-	err := godotenv.Load("/home/ubuntu/monit/.env")
+	err := godotenv.Load("/home/ubuntu/monitoring-ng/backend/.env")
 	if err != nil {
 		log.Printf("Avertissement : impossible de charger le fichier .env, utilisation des variables d'environnement du système.")
 	}
@@ -69,4 +69,32 @@ func WriteToInfluxDB(client influxdb2.Client, header netflow.NetFlowV5Header, re
 	if err := writeAPI.WritePoint(context.Background(), p); err != nil {
 		fmt.Printf("Erreur lors de l'écriture dans InfluxDB : %v\n", err)
 	}
+}
+
+// Query NetFlow dans InfluxDB
+func QueryNetFlowData() ([]map[string]interface{}, error) {
+	client := InitInfluxDB()
+	defer client.Close()
+
+	queryAPI := client.QueryAPI(influxDBOrg)
+	query := `from(bucket:"ntc-bucket") |> range(start: -1h)`
+	fmt.Printf("Exécution de la requête : %s\n", query)
+
+	result, err := queryAPI.Query(context.Background(), query)
+	if err != nil {
+		fmt.Printf("Erreur lors de la requête : %v\n", err)
+		return nil, err
+	}
+
+	var flows []map[string]interface{}
+	for result.Next() {
+		fmt.Printf("Enregistrement trouvé : %v\n", result.Record().Values())
+		flows = append(flows, result.Record().Values())
+	}
+
+	if result.Err() != nil {
+		fmt.Printf("Erreur dans les résultats : %v\n", result.Err())
+	}
+
+	return flows, nil
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 
+	"backend/internal/api"
 	"backend/internal/display"
 	"backend/internal/influxdb"
 	"backend/internal/netflow"
@@ -18,6 +19,8 @@ func main() {
 	client := influxdb.InitInfluxDB()
 	defer client.Close()
 
+	go api.StartServer()
+
 	address := ":2055" // Port UDP 2055
 	conn, err := net.ListenPacket("udp", address)
 	if err != nil {
@@ -28,8 +31,8 @@ func main() {
 
 	fmt.Printf("Écoute des données NetFlow v5 sur %s...\n", address)
 
-	buf := make([]byte, 1500)                                // Tampon pour les paquets entrants
-	filterIPs := []string{"192.168.108.115", "10.12.129.73"} // Adresses IP à filtrer
+	buf := make([]byte, 1500)                                                            // Tampon pour les paquets entrants
+	filterIPs := []string{"192.168.108.115", "10.12.129.73", "172.24.140.1", "10.10.5."} // Adresses IP à filtrer
 
 	for {
 		n, _, err := conn.ReadFrom(buf)
@@ -61,6 +64,12 @@ func main() {
 			} else if contains(filterIPs, srcIP) {
 				responses = append(responses, record) // Réponse : SrcIP correspond
 			}
+
+			// Enregistrer chaque flux dans InfluxDB
+			go func(rec netflow.NetFlowV5Record) { // Exécuter l'écriture de manière asynchrone
+				influxdb.WriteToInfluxDB(client, header, rec)
+			}(record)
+
 		}
 
 		// Afficher les flux : Requêtes suivies des Réponses
