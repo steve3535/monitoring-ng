@@ -29,7 +29,7 @@ func main() {
 	}
 	defer conn.Close()
 
-	fmt.Printf("Écoute des données NetFlow v5 sur %s...\n", address)
+	fmt.Printf("Écoute des données NetFlow ...!\n")
 
 	buf := make([]byte, 1500)                                                            // Tampon pour les paquets entrants
 	filterIPs := []string{"192.168.108.115", "10.12.129.73", "172.24.140.1", "10.10.5."} // Adresses IP à filtrer

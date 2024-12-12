@@ -77,7 +77,13 @@ func QueryNetFlowData() ([]map[string]interface{}, error) {
 	defer client.Close()
 
 	queryAPI := client.QueryAPI(influxDBOrg)
-	query := `from(bucket:"ntc-bucket") |> range(start: -1h)`
+	query := `from(bucket: "ntc-bucket")
+		|> range(start: -1h)
+		|> filter(fn: (r) => r._measurement == "netflow")
+		|> filter(fn: (r) => r.src_ip == "192.168.108.115" or r.dst_ip == "192.168.108.115")
+		|> pivot(rowKey:["_time"], columnKey:["_field"], valueColumn: "_value")
+		|> keep(columns: ["src_ip", "dst_ip", "src_port", "dst_port", "protocol", "bytes", "packets"])
+		|> group()`
 	fmt.Printf("Exécution de la requête : %s\n", query)
 
 	result, err := queryAPI.Query(context.Background(), query)
@@ -88,7 +94,7 @@ func QueryNetFlowData() ([]map[string]interface{}, error) {
 
 	var flows []map[string]interface{}
 	for result.Next() {
-		fmt.Printf("Enregistrement trouvé : %v\n", result.Record().Values())
+		// fmt.Printf("Enregistrement trouvé : %v\n", result.Record().Values())
 		flows = append(flows, result.Record().Values())
 	}
 
