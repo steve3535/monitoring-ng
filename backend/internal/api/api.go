@@ -9,7 +9,7 @@ import (
 
 // StartServer démarre le serveur HTTP
 func StartServer() {
-	http.HandleFunc("/", handleGetFlows)
+	http.HandleFunc("/flows", handleGetFlows)
 	fmt.Println("API Server running ...!")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		fmt.Printf("Erreur lors du démarrage du serveur HTTP : %v\n", err)
